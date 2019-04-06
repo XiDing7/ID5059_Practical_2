@@ -93,8 +93,9 @@ Dat[which(Dat$ArrDelay == max(na.omit(Dat$ArrDelay))),]
 
 #4. Find the carrier that has the greatest number of cancelled flights.
 #MQ
-GTCancelled <- Dat%>%group_by(UniqueCarrier)%>% summarise(Sum = sum(Cancelled))
-arrange(GTCancelled, desc(Sum))
+GTCancelled <- Dat%>%group_by(UniqueCarrier)%>%filter(Cancelled == 1)%>% 
+  summarise(n = n())
+arrange(GTCancelled, desc(n))
 
 #5. Let's examine departure time and consider distribution by hour (column
 #DepHour that we've created earlier). Which hour has the highest percentage 
@@ -106,17 +107,20 @@ arrange(DH, desc(n))
 #6. OK, now let's examine cancelled flight distribution by time. 
 #Which hour has the least percentage of cancelled flights?
 #2am
-Time1 <- Dat%>%group_by(DepHour)%>%summarise(Sum = sum(Cancelled))
-arrange(Time1, Sum)
+Time1<-Dat%>%group_by(DepHour)%>%filter(Cancelled == "1")
+Time2<-Dat%>%group_by(DepHour)%>%filter(Cancelled == "1")%>%summarise(n=n())
+arrange(Time2, n)
 
 #7. Is there any hour that didn't have any cancelled flights at all?
 #Check all that apply.
 #3am
+ggplot(Time1)+geom_bar(aes(DepHour))
 
 #8. Find the busiest hour, or in other words, the hour when the number of
 #departed flights reaches its maximum.
-#7am
-arrange(Time1, desc(Sum))
+#8am
+Time3 <-Dat%>%group_by(DepHour)%>%filter(Cancelled == "0")%>% summarise(n=n())
+arrange(Time3, desc(n))
 
 #9. Since we know the departure hour, it might be interesting to examine the 
 #average delay for corresponding hour. Are there any cases, when the planes on 
@@ -218,3 +222,4 @@ DepData <- NewData[-pick2,]
 #Boxplot of values
 ggplot(ArrData)+geom_boxplot(aes(x = UniqueCarrier, y = ArrDelay))
 ggplot(DepData)+geom_boxplot(aes(x = UniqueCarrier, y = DepDelay))
+
